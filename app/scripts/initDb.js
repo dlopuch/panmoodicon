@@ -4,9 +4,9 @@
  * Uses the app's DB connector instead of worrying about how to find and connect to a sqlite db.
  */
 
-const db = require('../io/db');
+const promiseDb = require('../io/promiseDb');
 
-db.then((db) => {
+promiseDb.then((db) => {
   db.serialize(() => {
     db.run(`
       CREATE TABLE mood (
@@ -18,7 +18,7 @@ db.then((db) => {
     db.run(`
       CREATE TABLE capture (
         capture_id INTEGER PRIMARY KEY,
-        user_id INTEGER,
+        user_id INTEGER NOT NULL,
         timestamp DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
         mood_id INTEGER,
         mood_timestamp DATE,
@@ -29,9 +29,14 @@ db.then((db) => {
     db.run(`
       CREATE TABLE location (
         location_id INTEGER PRIMARY KEY,
-        location_desc TEXT NOT NULL
+        location_desc TEXT NOT NULL UNIQUE
       )`,
     );
+
+    db.run(`
+      CREATE UNIQUE INDEX idx_location_uniq
+      ON location (location_desc) 
+    `);
 
     // capture <--> location many-many join table
     db.run(`

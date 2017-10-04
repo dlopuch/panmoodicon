@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-const promiseDb = require('../io/db');
+const promiseDb = require('../io/promiseDb');
 
 /**
  * @param moodId
@@ -15,7 +15,7 @@ exports.getMoodById = moodId => promiseDb
  */
 exports.getMoodsIdx = () => promiseDb
 .then(db => db.allAsync('SELECT * FROM mood'))
-.then(results => _.keyBy(results, 'mood_id'));
+.then(results => _.keyBy(results, 'mood_id')); // TODO: This could benefit from a caching layer
 
 /**
  * Insert a new mood into the DB
