@@ -1,0 +1,36 @@
+{
+  "name": "panmoodicon",
+  "version": "1.0.0",
+  "description": "Wholistic surveillance into user moods",
+  "main": "index.js",
+  "scripts": {
+    "lint-dev": "node_modules/.bin/esw app/ -w --clear --cache",
+    "init-db": "rm app/sqlite.db; node app/scripts/initDb",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dlopuch/panmoodicon.git"
+  },
+  "author": "Dan Lopuch (http://www.onafloatingrock.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dlopuch/panmoodicon/issues"
+  },
+  "homepage": "https://github.com/dlopuch/panmoodicon#readme",
+  "devDependencies": {
+    "eslint": "^4.8.0",
+    "eslint-config-airbnb-base": "^12.0.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-watch": "^3.1.2"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.1",
+    "lodash": "^4.17.4",
+    "morgan": "^1.9.0",
+    "sqlite3": "^3.1.13",
+    "sqlite3-transactions": "0.0.5"
+  }
+}
