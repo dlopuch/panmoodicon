@@ -6,8 +6,10 @@
   "scripts": {
     "lint-dev": "node_modules/.bin/esw app/ -w --clear --cache",
     "init-db": "rm app/sqlite.db; node app/scripts/initDb",
-    "test": "NODE_ENV=test mocha app/test/**/*",
-    "test-integration": "NODE_ENV=test JWT_ALG=HS256 JWT_SECRET=shhhhhh mocha app/test-integration/**/*"
+    "test": "npm run init-db; NODE_ENV=test mocha app/test/**/*",
+    "test-integration": "npm run init-db; NODE_ENV=test JWT_ALG=HS256 JWT_SECRET=shhhhhh mocha app/test-integration/**/*",
+    "get-jwt": "NODE_ENV=development JWT_ALG=HS256 JWT_SECRET=shhhhhh node app/scripts/getJwt.js",
+    "app": "NODE_ENV=development JWT_ALG=HS256 JWT_SECRET=shhhhhh node index.js"
   },
   "repository": {
     "type": "git",

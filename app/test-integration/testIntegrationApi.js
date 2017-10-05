@@ -19,7 +19,7 @@ describe('API Integration Test', () => {
       .expect(401)
       .expect((res) => {
         assert.equal(res.body.error, 'Missing authorization, please include JWT');
-      })
+      }),
     );
   });
 
