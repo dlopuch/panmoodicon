@@ -8,7 +8,7 @@ module.exports = (
   moodModel,
   captureModel,
   locationModel,
-  captureService,
+  classifyMoodService,
   locationService,
 ) => ({
 
@@ -16,7 +16,7 @@ module.exports = (
     captureModel.getCaptureById(captureId)
     .then((capture) => {
       if (!capture) {
-        return Promise.reject(new NotFoundError('No capture found', 'No capture with that ID in DB'));
+        return Promise.reject(new NotFoundError('No capture found', `No capture with ID ${captureId} in DB`));
       }
 
       if (capture.user_id !== userId) {
@@ -57,7 +57,7 @@ module.exports = (
     //   For this iteration: we return the main promise so API can respond, but in background, working on other services
 
     let promiseMoodClassification = promiseCreation
-    .then(() => captureService.classifyMood(captureData))
+    .then(() => classifyMoodService.classifyMood(captureData))
     .then(moodName => moodModel.getOrCreateMoodByName(moodName))
     .then(moodRecord => captureModel.updateCapture(capture.capture_id, {
       mood_id: moodRecord.mood_id,

@@ -27,7 +27,7 @@ module.exports = (
   });
 
   router.get('/mood/:mood_id/locations', function(req, res, next) {
-    moodBusiness.getLocationCountsByMoodId(FAKE_USER_ID, req.params.mood_id)
+    moodBusiness.getLocationCountsByMoodId(FAKE_USER_ID, req.params.mood_id, 10)
     .then(data => res.json(data))
     .catch(err => next(err));
   });

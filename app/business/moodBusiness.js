@@ -29,7 +29,7 @@ module.exports = (
     .then(data =>
       _(data.countsByMoodId)
       .mapValues((count, moodId) => ({ mood_id: Number.isNaN(parseInt(moodId, 10)) ? null : moodId, count }))
-      .mapKeys((count, moodId) => data.moodsById[moodId] || moodId)
+      .mapKeys((count, moodId) => data.moodsById[moodId].mood_desc || moodId)
       .value(),
     ),
 
@@ -39,8 +39,8 @@ module.exports = (
         return reject(new Error('Invalid or missing userId'));
       }
 
-      if (typeof moodId !== 'number') {
-        return reject(new Error('Invalid or missing moodId'));
+      if (Number.isNaN(Number(moodId))) {
+        return reject(new UserError('Invalid or missing moodId'));
       }
 
       return resolve();
@@ -62,7 +62,7 @@ module.exports = (
     .then(data =>
       _(data.locationCountsByLocId)
       .mapValues((count, locId) => ({ location_id: locId, count }))
-      .mapKeys((count, locId) => data.locationsById[locId])
+      .mapKeys((count, locId) => data.locationsById[locId].location_desc)
       .value(),
     ),
 
