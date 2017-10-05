@@ -15,7 +15,7 @@ Full-stack demo project stubbing out a mood classification service.
 1. `npm run test-integration`: Run integration test suite (hits API endpoints)
 1. `npm run init-db`: Initializes new sqlite db (`app/sqlite.db`)
 1. `npm run get-jwt`: Create an example JWT token.  Copy the string, you'll need to cURL your own requests
-1. `npm run app`: Starts up the app on localhost:3000 for your own testing
+1. `npm run app`: Starts up the app on `localhost:3000` for your own testing. Try some curl'ing.
 
 # API
 
@@ -28,7 +28,6 @@ to create one for you (`npm run get-jwt`).  You can use the output like this:
 # curl -H "Authorization: Bearer d3ad.b33f.b33333f" localhost:3000/api/...
 ```
 
-Endpoints:
 
 ## POST `/api/capture`
 *Requires JSON body like `{ captureData: 'some mock image data' }`*
