@@ -5,6 +5,23 @@ const assert = require('assert');
 const moodModel = require('../../model/moodModel');
 
 describe('Mood Model', function() {
+  describe('#getOrCreateMoodByName', function() {
+    it('handles multiple inserts', () => {
+      let firstInsert;
+
+      return moodModel.getOrCreateMoodByName('multi-create mood')
+      .then(dbMood => (firstInsert = dbMood))
+      .then(() => moodModel.getOrCreateMoodByName('multi-create mood'))
+      .then((dbMood) => {
+        assert.ok(dbMood);
+        assert.ok(firstInsert);
+
+        assert.ok(firstInsert.mood_id);
+
+        assert.deepEqual(dbMood, firstInsert, 'Expected same mood record');
+      });
+    });
+  });
   it('completes Insert > Read > Index integration test', function() {
     let MOOD_NAME = 'test mood';
     let newMoodId;

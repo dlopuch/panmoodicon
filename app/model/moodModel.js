@@ -10,6 +10,20 @@ exports.getMoodById = moodId => promiseDb
 .then(db => db.getAsync('SELECT * FROM mood WHERE mood_id = $moodId', { $moodId: moodId }))
 .then(results => results || null); // sqlite returns undefined if not found, make it null
 
+
+exports.getOrCreateMoodByName = moodName => promiseDb
+// Create mood if it doesn't exist
+.then(db => db.runAsync(
+  'INSERT OR IGNORE INTO mood (mood_desc) VALUES ($desc)',
+  { $desc: moodName },
+))
+// Retrieve full record regardless of outcome
+.then(() => promiseDb)
+.then(db => db.getAsync(
+  'SELECT * FROM mood WHERE mood_desc = $desc',
+  { $desc: moodName },
+));
+
 /**
  * @returns Promise resolved with an index of all DB moods keyed by mood_id
  */

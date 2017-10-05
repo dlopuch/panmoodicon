@@ -64,7 +64,7 @@ exports.updateCapture = (captureId, attrs) => promiseDb
 
     if (attrs.mood_id) {
       tDb.run(
-        'UPDATE capture SET mood_id = $mood_id WHERE capture_id = $capture_id',
+        "UPDATE capture SET mood_id = $mood_id, mood_timestamp = datetime('now') WHERE capture_id = $capture_id",
         { $mood_id: attrs.mood_id, $capture_id: captureId },
       );
     }
@@ -101,3 +101,22 @@ exports.countMoodsByUserId = userId => promiseDb
   { $user_id: userId },
 ))
 .then(results => _(results).keyBy(record => record.mood_id || 'unclassified').mapValues(r => r.count).value());
+
+/**
+ * Counts the number of each type of location that appears when a user feels a certain mood
+ * @param userId
+ * @param moodId
+ * @returns Map of location_id to the number of times that location appears for the specified mood
+ */
+exports.countLocationFrequencyByMood = (userId, moodId) => promiseDb
+.then(db => db.allAsync(`
+    SELECT location_id, count(*) AS count 
+    FROM capture c
+    INNER JOIN capture_location cl ON c.capture_id = cl.capture_id
+    WHERE user_id = $user_id AND mood_id = $mood_id
+    GROUP BY location_id
+    ORDER BY count DESC
+  `,
+  { $user_id: userId, $mood_id: moodId },
+))
+.then(results => _(results).keyBy(record => record.location_id).mapValues(r => r.count).value());

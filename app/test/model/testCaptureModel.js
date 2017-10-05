@@ -70,8 +70,8 @@ describe('Capture Model', function() {
   });
 
   describe('#countMoodsByUserId', function() {
-    it.only('counts correctly', function() {
-      const USER_ID = 1;
+    it('counts correctly', function() {
+      const USER_ID = 5413;
       let mood1;
       let mood2;
 
@@ -97,6 +97,47 @@ describe('Capture Model', function() {
             [mood1.mood_id]: 1,
             [mood2.mood_id]: 2,
             unclassified: 1,
+          },
+        );
+      });
+    });
+  });
+
+  describe('#countLocationFrequencyByMood', function() {
+    it('counts correctly', function() {
+      const USER_ID = 178431;
+      let mood;
+      let loc1;
+      let loc2;
+      let loc3;
+
+      let createLocatedCapture = locations =>
+        captureModel.createCapture(USER_ID)
+        .then(capture => captureModel.updateCapture(capture.capture_id, {
+          mood_id: mood.mood_id,
+          location_ids: locations ? locations.map(l => l.location_id) : undefined,
+        }));
+
+      return moodModel.insertMood('#countLocationFrequencyByMood').then(newMood => (mood = newMood))
+      .then(() => locationModel.insertLocation(`${USER_ID} 1`)).then(newLoc => (loc1 = newLoc))
+      .then(() => locationModel.insertLocation(`${USER_ID} 2`)).then(newLoc => (loc2 = newLoc))
+      .then(() => locationModel.insertLocation(`${USER_ID} 3`)).then(newLoc => (loc3 = newLoc))
+      .then(() => createLocatedCapture([loc3]))
+      .then(() => createLocatedCapture([loc3, loc2]))
+      .then(() => createLocatedCapture([loc3, loc2, loc1]))
+
+      // create an unlocated capture
+      .then(() => createLocatedCapture())
+
+      .then(() => captureModel.countLocationFrequencyByMood(USER_ID, mood.mood_id))
+      .then((results) => {
+        assert.ok(results, 'results missing');
+        assert.deepEqual(
+          results,
+          {
+            [loc1.location_id]: 1,
+            [loc2.location_id]: 2,
+            [loc3.location_id]: 3,
           },
         );
       });

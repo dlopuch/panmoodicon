@@ -11,9 +11,14 @@ promiseDb.then((db) => {
     db.run(`
       CREATE TABLE mood (
         mood_id INTEGER PRIMARY KEY,
-        mood_desc TEXT NOT NULL
+        mood_desc TEXT NOT NULL UNIQUE
       )`,
     );
+
+    db.run(`
+      CREATE UNIQUE INDEX idx_mood_uniq
+      ON mood (mood_desc) 
+    `);
 
     db.run(`
       CREATE TABLE capture (
