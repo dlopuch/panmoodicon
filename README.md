@@ -44,9 +44,10 @@ $ curl -H "Authorization: $JWT" localhost:3000/api/...
 
 
 ## POST `/api/capture`
+
 *Requires JSON body like `{ captureData: 'some mock image data' }`*
 
-Creates a new mood capture record and returns it.  Mood and locations will
+**Creates a new mood capture record and returns it.**  Mood and locations will
 initially be empty as background services work to code these traits -- keep polling
 for updates
 
@@ -73,7 +74,8 @@ Example response:
 ```
 
 ## GET `/api/capture/:capture_id`
-Gets the capture record.  Mood and location will eventually get filled in.
+
+**Gets the capture record.**  Mood and location will be filled in when background services finish processing -- keep polling.
 
 Example request:
 
@@ -95,8 +97,70 @@ Example response:
 Note that `mood_id` and `location_ids`, which were initially blank in the POST, are now filled in now that the background
 jobs have completed
 
+
 ## GET `/api/mood`
-Gets counts of all user's captured moods
+
+**Gets counts of all user's captured moods.**
+
+Example request (hint: try POST'ing a bunch of captures first):
+
+```
+curl -H "Authorization: $JWT" localhost:3000/api/mood
+```
+
+Example response:
+
+```json
+{
+  "neutral": {
+    "mood_id": "1",
+    "count": 2
+  },
+  "sad": {
+    "mood_id": "2",
+    "count": 7
+  },
+  "happy": {
+    "mood_id": "3",
+    "count": 3
+  }
+}
+```
+
 
 ## GET `/api/mood/:mood_id/locations`
-Gets most frequent locations for a user's moods
+
+**Gets most frequent locations tagged during a user's moods**
+
+Example request (hint: try POST'ing a bunch of captures first):
+
+```
+curl -H "Authorization: $JWT" localhost:3000/api/mood/3/locations
+```
+
+Example response:
+
+```json
+{
+  "a giant battery": {
+    "location_id": "2",
+    "count": 5
+  },
+  "park": {
+    "location_id": "3",
+    "count": 3
+  },
+  "dessert": {
+    "location_id": "4",
+    "count": 3
+  },
+  "desert": {
+    "location_id": "6",
+    "count": 2
+  },
+  "storage locker": {
+    "location_id": "7",
+    "count": 1
+  }
+}
+```
