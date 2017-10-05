@@ -1,4 +1,5 @@
 const express = require('express');
+const UserError = require('../business/UserError');
 
 // DI wrapper
 module.exports = (
@@ -74,7 +75,7 @@ module.exports = (
 
   // catch 404 and forward to error handler
   router.use(function(req, res, next) {
-    let err = new Error('Not Found');
+    let err = new UserError('Not Found');
     err.status = 404;
     next(err);
   });
@@ -86,11 +87,12 @@ module.exports = (
       status: err.status || 500,
     };
 
-    // Add additional data only if in development mode
-    if (req.app.get('env') === 'development') {
+    // Add additional data only if in development/test mode
+    if (req.app.get('env') === 'development' || req.app.get('env') === 'test') {
       errData.moreInfo = {
         message: err.message,
         stack: err.stack,
+        fullError: err, // for extra attributes stacked on it
       };
     }
 

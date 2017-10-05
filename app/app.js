@@ -26,7 +26,12 @@ app.use(function(req, res, next) {
 // Global error handler: hook for logging infrastructure
 app.use(function(err, req, res, next) {
   // TODO: Catch all errors here and send to logging infrastructure
-  console.warn('[LOGGING INFRASTRUCTURE] error on route: ', err.stack);
+  if (err.status < 500) {
+    // User-errors often noise -- just log with a warning
+    console.warn('[LOGGING INFRASTRUCTURE] user-error on route: ', err.stack);
+  } else {
+    console.error('[LOGGING INFRASTRUCTURE] internal error on route: ', err.stack);
+  }
 });
 
 module.exports = app;

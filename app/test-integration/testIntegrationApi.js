@@ -13,6 +13,16 @@ function getAuthFor(userId) {
 }
 
 describe('API Integration Test', () => {
+  describe('Requires JWT auth', () => {
+    it("401's when no Authorization header provided", () =>
+      request(app).get('/api')
+      .expect(401)
+      .expect((res) => {
+        assert.equal(res.body.error, 'Missing authorization, please include JWT');
+      })
+    );
+  });
+
   describe('/api/capture', () => {
     it('POSTs new captures', () =>
       request(app)
