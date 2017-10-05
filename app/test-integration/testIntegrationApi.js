@@ -6,12 +6,18 @@ const Promise = require('bluebird');
 const request = require('supertest'); // eslint-disable-line import/no-extraneous-dependencies
 
 const app = require('../app');
+const jwt = require('../business/jwtBusiness');
+
+function getAuthFor(userId) {
+  return { Authorization: jwt.createAuthHeader(userId) };
+}
 
 describe('API Integration Test', () => {
   describe('/api/capture', () => {
     it('POSTs new captures', () =>
       request(app)
       .post('/api/capture')
+      .set(getAuthFor(101))
       .send({ captureData: 'some jpeg info' })
       .expect(200)
       .expect((res) => {
@@ -25,9 +31,11 @@ describe('API Integration Test', () => {
       it("GET's previously-posted captures", () =>
         request(app)
         .post('/api/capture').send({ captureData: 'some jpeg info' }).expect(200)
+        .set(getAuthFor(102))
         .then(postResp =>
           request(app)
           .get(`/api/capture/${postResp.body.capture_id}`)
+          .set(getAuthFor(102))
           .expect(200)
           .expect((res) => {
             assert.deepEqual(res.body, postResp.body, 'Expected GET to be same result as POST');
@@ -37,7 +45,9 @@ describe('API Integration Test', () => {
 
       it('GET fills in background service info after waiting a bit', () =>
         request(app)
-        .post('/api/capture').send({ captureData: 'some jpeg info' }).expect(200)
+        .post('/api/capture').send({ captureData: 'some jpeg info' })
+        .set(getAuthFor(103))
+        .expect(200)
 
         // Wait for background services to finish mood and location coding
         // TODO: Instead of hardcoded waits, could do an applicationContext with promise-controlled mock services
@@ -49,6 +59,7 @@ describe('API Integration Test', () => {
         .then(postResp =>
           request(app)
           .get(`/api/capture/${postResp.body.capture_id}`)
+          .set(getAuthFor(103))
           .expect(200)
           .expect((res) => {
             assert.ok(res.body.mood_id, 'expected mood_id to be filled in');
@@ -63,6 +74,9 @@ describe('API Integration Test', () => {
   describe('/api/mood', () => {
     let setupCapturesByMoodId;
 
+    // All of these tests as same user
+    const API_MOOD_USER_ID = 104;
+
     // Before these ones: send off 10 POST requests and count up the results
     before(function() {
       this.timeout(5000); // Let background services run
@@ -72,7 +86,10 @@ describe('API Integration Test', () => {
       return Promise.map(
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         n =>
-          request(app).post('/api/capture').send({ captureData: `data ${n}` }).expect(200)
+          request(app).post('/api/capture')
+          .send({ captureData: `data ${n}` })
+          .set(getAuthFor(API_MOOD_USER_ID))
+          .expect(200)
 
           // Wait for background services to finish mood and location coding
           .then(postResp => new Promise(resolve =>
@@ -82,6 +99,7 @@ describe('API Integration Test', () => {
           .then(postResp =>
             request(app)
             .get(`/api/capture/${postResp.body.capture_id}`)
+            .set(getAuthFor(API_MOOD_USER_ID))
             .expect(200)
             .expect((res) => {
               setupCapturesByMoodId[res.body.mood_id] = setupCapturesByMoodId[res.body.mood_id] || { count: 0, location_ids: [] };
@@ -96,6 +114,7 @@ describe('API Integration Test', () => {
     it("GET's the frequency histogram of moods", () =>
       request(app)
       .get('/api/mood')
+      .set(getAuthFor(API_MOOD_USER_ID))
       .expect(200)
       .expect((res) => {
         // We want reported frequencies to be at least the number of ones we created in this test
@@ -115,6 +134,7 @@ describe('API Integration Test', () => {
           moodId =>
             request(app)
             .get(`/api/mood/${moodId}/locations`)
+            .set(getAuthFor(API_MOOD_USER_ID))
             .expect(200)
             .expect((res) => {
               let expectedLocationIds = _.uniq(setupCapturesByMoodId[moodId].location_ids);

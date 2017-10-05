@@ -23,12 +23,10 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-// error handler
+// Global error handler: hook for logging infrastructure
 app.use(function(err, req, res, next) {
   // TODO: Catch all errors here and send to logging infrastructure
-  console.warn('ERROR serving route: ', err.stack);
+  console.warn('[LOGGING INFRASTRUCTURE] error on route: ', err.stack);
 });
-
-app.listen(3000, () => console.log('Panmoodicon listening on localhost:3000'));
 
 module.exports = app;

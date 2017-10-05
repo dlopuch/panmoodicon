@@ -4,30 +4,70 @@ const express = require('express');
 module.exports = (
   captureBusiness,
   moodBusiness,
+  jwtBusiness,
 ) => {
   const router = express.Router();
-  const FAKE_USER_ID = 4;
+
+  /**
+   * JWT authorization MW.  Extracts the JWT payload, expecting a valid user_id to be set.
+   * MW sets the JWT payload under the req.user object.  See the getUserId(req) function below.
+   */
+  router.use(function(req, res, next) {
+    let authHeader = req.get('Authorization');
+    let tokenMatcher = /Bearer (.*)/g;
+
+    let matches = tokenMatcher.exec(authHeader);
+
+    let promiseVerification;
+    if (!matches) {
+      promiseVerification = jwtBusiness.verify(null); // will with appropriate error
+    } else {
+      promiseVerification = jwtBusiness.verify(matches[1]);
+    }
+
+    promiseVerification
+    .then((decoded) => {
+      if (!decoded.user_id) {
+        let e = new Error('Unexpected JWT -- JWT valid, but missing user_id in payload');
+        e.jwtPayload = decoded;
+        next(e);
+        return;
+      }
+
+      req.user = decoded;
+      next();
+    })
+    .catch(err => next(err));
+  });
+
+  /**
+   * Helper function to extract standard JWT-supplied user-id from a request
+   * @param req
+   */
+  function getUserId(req) {
+    return req.user.user_id;
+  }
 
   router.post('/capture', function(req, res, next) {
-    captureBusiness.postNewCapture(FAKE_USER_ID, req.body.captureData)
+    captureBusiness.postNewCapture(getUserId(req), req.body.captureData)
     .then(captureRecord => res.json(captureRecord))
     .catch(err => next(err));
   });
 
   router.get('/capture/:capture_id', (req, res, next) => {
-    captureBusiness.getCaptureById(FAKE_USER_ID, req.params.capture_id)
+    captureBusiness.getCaptureById(getUserId(req), req.params.capture_id)
     .then(record => res.json(record))
     .catch(err => next(err));
   });
 
   router.get('/mood', function(req, res, next) {
-    moodBusiness.getMoodFrequencies(FAKE_USER_ID)
+    moodBusiness.getMoodFrequencies(getUserId(req))
     .then(data => res.json(data))
     .catch(err => next(err));
   });
 
   router.get('/mood/:mood_id/locations', function(req, res, next) {
-    moodBusiness.getLocationCountsByMoodId(FAKE_USER_ID, req.params.mood_id, 10)
+    moodBusiness.getLocationCountsByMoodId(getUserId(req), req.params.mood_id, 10)
     .then(data => res.json(data))
     .catch(err => next(err));
   });

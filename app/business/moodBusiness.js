@@ -29,7 +29,7 @@ module.exports = (
     .then(data =>
       _(data.countsByMoodId)
       .mapValues((count, moodId) => ({ mood_id: Number.isNaN(parseInt(moodId, 10)) ? null : moodId, count }))
-      .mapKeys((count, moodId) => data.moodsById[moodId].mood_desc || moodId)
+      .mapKeys((count, moodId) => _.get(data.moodsById[moodId], 'mood_desc') || moodId)
       .value(),
     ),
 

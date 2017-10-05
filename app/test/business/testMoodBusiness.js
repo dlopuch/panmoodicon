@@ -10,9 +10,12 @@ describe('moodBusiness.js', function() {
       let moodBusiness = moodBusinessDI(
         // moodModel mock:
         {
-          getMoodsIdx: () => new Promise(resolve => resolve(
-            { 11: 'mood 11', 22: 'mood 22' },
-          )),
+          getMoodsIdx: () => Promise.resolve(
+            {
+              11: { mood_id: 11, mood_desc: 'mood 11' },
+              22: { mood_id: 22, mood_desc: 'mood 22' },
+            },
+          ),
         },
 
         // captureModel mock:
@@ -48,9 +51,9 @@ describe('moodBusiness.js', function() {
         // locationModel mock:
         {
           getLocationsIdx: () => new Promise(resolve => resolve({
-            11: 'loc 11',
-            22: 'loc 22',
-            33: 'loc 33',
+            11: { location_id: 11, location_desc: 'loc 11' },
+            22: { location_id: 22, location_desc: 'loc 22' },
+            33: { location_id: 33, location_desc: 'loc 33' },
           })),
         },
       );
