@@ -49,6 +49,10 @@ module.exports = (
     return req.user.user_id;
   }
 
+  // TODO: POSTing a new capture is mocked out. In this iteration, we're only simulating a full image by specifying a
+  //   JSON payload mock to take the place of the image data.  Full version would use a multipart upload stream.
+  //   Rather than storing full image contents on server, API could just act as proxy sending the stream to the mood
+  //   and location services.  Open question: performance requirements, max upload bytesize, appropriate cutoffs, etc.
   router.post('/capture', function(req, res, next) {
     captureBusiness.postNewCapture(getUserId(req), req.body.captureData)
     .then(captureRecord => res.json(captureRecord))

@@ -1,12 +1,12 @@
 # panmoodicon
 
-Full-stack demo project stubbing out a mood classification service.
+Example API demo project stubbing out a "mood classification" service.
 
 - RESTful API
 - sqlite as persistent data store
 - mocha for testing (unit & integration)
 - Business tier with DI for mocking out components
-- JWT for authorization
+- JWT for authorization and authentication
 
 # Run Instructions
 
@@ -164,3 +164,44 @@ Example response:
   }
 }
 ```
+
+# Overview and Discussion
+
+- Persistence
+    - sqlite DB
+    - Schema defined in `scripts/initDb.js`
+- Model Tier
+    - Defines SQL queries to run against DB
+    - Define model schema
+- Business Tier
+    - Dispatches to multiple model objects and combines results together
+    - Business logic like "is user authorized to access an entity"
+        - And if not, how to report it (see Logging)
+    - Simple DI wrappers to define model and service dependencies
+        - See mocks used in `test/business/`
+    - Node async control flow can be a pain to uninitiated. However, it really shines when dispatching to "background jobs".
+      See `business/captureBusiness#postNewCapture()` for promise branching that allow quick response while dispatching to
+      background jobs while avoiding, eg thread pool complexity.
+- API Tier
+    - RESTful endpoints
+    - MW just thin wrappers for business functions (business tier should be unaware of HTTP context!)
+    - MW chain resolves various concerns -- authentication, logging, error reporting, etc.
+- User Model and Authentication
+    - All API requests require JWT keys
+    - JWT secrets are read from env on bootup -- up to startup environment to supply them
+    - JWT allows app to not concern itself about user management
+        - Access allowed as long as trusted bearer token presented
+    - *About JWT:* just signed claims, base-64 encoded.  eg take output of `npm run get-jwt` and [base-64 decode it](https://www.base64decode.org/)
+- Logging
+    - Endpoint timing example done using `morgan` -- see endpoint timing in console
+        - Can be redirected to logging infrastructure, eg influxDB, ELK/Elastic, etc.
+    - Global error handler logs all errors. Can also be directed to logging infrastructure.
+- Testing
+    - Unit Tests: `app/test/`
+        - Business logic tests use mocks for models and services (hence, DI wrappers)
+        - Model tests check functionality of database queries
+            - TODO: Proper functional test suite would include something like a transactional wrapper for DB so tests could
+              be stateless.  Discussion about example dataset -- worth it or not.
+    - Integration Tests: `app/test-integration/`
+        - Hit actual HTTP endpoints to check app flow end-to-end
+        - Stateful by nature
