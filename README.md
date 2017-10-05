@@ -19,6 +19,13 @@ Full-stack demo project stubbing out a mood classification service.
 1. OPTIONAL: `npm run app-prod`: Starts up the app in prod mode (no debug logging, etc.). 
 Expects `JWT_ALG` and `JWT_SECRET` env vars to be set by deployment orchestration (you can fake it with `$ JWT_ALG=HS256 JWT_SECRET=shhhhhh npm run app-prod`)
 
+## Linting (Code Style)
+We're using `eslint` to enforce code style.  While developing, you can open up a terminal window
+and run `npm run lint-dev` to have an updating lint watch server to remind you of all the commas
+you forget with your sloppy js ; )
+
+Using the airbnb javascript code style, with a couple overrides where strong opinions differ.
+
 # API
 
 You can use any HTTP request tool to hit the API (cURL, Postman, the integration tests, etc.)
