@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const promiseDb = require('../io/promiseDb');
 
 /**
@@ -41,8 +43,17 @@ exports.createCapture = userId => promiseDb
     },
   );
 }))
-.then(newId => exports.getCaptureById(userId, newId));
+.then(newId => exports.getCaptureById(newId));
 
+/**
+ * Updates attributes of a capture
+ *
+ * @param captureId Which capture to update
+ * @param attrs Object like: {
+ *   .mood_id: ID of mood to update
+ *   .location_ids: Array of location ID's to configure
+ * }
+ */
 exports.updateCapture = (captureId, attrs) => promiseDb
 .then(db => new Promise((resolve, reject) => {
   db.beginTransaction(function(error, tDb) {
@@ -76,3 +87,17 @@ exports.updateCapture = (captureId, attrs) => promiseDb
     });
   });
 }));
+
+/**
+ * Counts the number of mood captures for a user
+ * @param userId
+ * @returns Object where key is mood_id, value is number of times that mood appeared.
+ *   Moods that were never captured for a user are not included.
+ *   Moods not yet classified are keyed as 'unclassified'.
+ */
+exports.countMoodsByUserId = userId => promiseDb
+.then(db => db.allAsync(
+  'SELECT mood_id, count(*) AS count FROM capture WHERE user_id = $user_id GROUP BY mood_id',
+  { $user_id: userId },
+))
+.then(results => _(results).keyBy(record => record.mood_id || 'unclassified').mapValues(r => r.count).value());

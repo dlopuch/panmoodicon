@@ -68,4 +68,38 @@ describe('Capture Model', function() {
       });
     });
   });
+
+  describe('#countMoodsByUserId', function() {
+    it.only('counts correctly', function() {
+      const USER_ID = 1;
+      let mood1;
+      let mood2;
+
+      let createMoodyCapture = moodRecord =>
+        captureModel.createCapture(USER_ID)
+        .then(capture => captureModel.updateCapture(capture.capture_id, { mood_id: moodRecord.mood_id }));
+
+      return moodModel.insertMood('mood1').then(newMood => (mood1 = newMood))
+      .then(() => moodModel.insertMood('mood2')).then(newMood => (mood2 = newMood))
+      .then(() => createMoodyCapture(mood1))
+      .then(() => createMoodyCapture(mood2))
+      .then(() => createMoodyCapture(mood2))
+
+      // create an unclassified capture
+      .then(() => captureModel.createCapture(USER_ID))
+
+      .then(() => captureModel.countMoodsByUserId(USER_ID))
+      .then((results) => {
+        assert.ok(results, 'results missing');
+        assert.deepEqual(
+          results,
+          {
+            [mood1.mood_id]: 1,
+            [mood2.mood_id]: 2,
+            unclassified: 1,
+          },
+        );
+      });
+    });
+  });
 });
