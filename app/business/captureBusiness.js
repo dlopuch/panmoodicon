@@ -1,6 +1,7 @@
 const Promise = require('bluebird');
 
 const UserError = require('./UserError');
+const NotFoundError = require('./NotFoundError');
 
 // DI Wrapper
 module.exports = (
@@ -10,6 +11,20 @@ module.exports = (
   captureService,
   locationService,
 ) => ({
+
+  getCaptureById: (userId, captureId) =>
+    captureModel.getCaptureById(captureId)
+    .then((capture) => {
+      if (!capture) {
+        return Promise.reject(new NotFoundError('No capture found', 'No capture with that ID in DB'));
+      }
+
+      if (capture.user_id !== userId) {
+        return Promise.reject(new NotFoundError('No capture found', 'Capture actually found but wrong user'));
+      }
+
+      return capture;
+    }),
 
   /**
    * Creates a new mood capture and initiates mood and location classification.

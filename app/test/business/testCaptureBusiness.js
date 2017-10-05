@@ -11,7 +11,7 @@ const captureBusinessDI = require('../../business/captureBusiness');
 
 describe('captureBusiness.js', function() {
   describe('#postNewCapture', function() {
-    it.only('posts and completes background jobs, updating DB in order', () => {
+    it('posts and completes background jobs, updating DB in order', () => {
       const MOOD = 'happy';
       const LOCATIONS = ['supermarket', 'park', 'storage-locker'];
 
